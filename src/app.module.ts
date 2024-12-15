@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
 import { AppService } from './app.service';
-import { VehiclesModule } from './modules/vehicles/vehicles.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { redisStore } from 'cache-manager-redis-yet';
 import { CacheModule } from '@nestjs/cache-manager';
+import { AppResolver } from './app.resolver';
 
 @Module({
   imports: [
@@ -31,9 +31,8 @@ import { CacheModule } from '@nestjs/cache-manager';
       playground: true,
     }),
     ConfigModule.forRoot(),
-    VehiclesModule,
   ],
   controllers: [],
-  providers: [AppService],
+  providers: [AppService, AppResolver],
 })
 export class AppModule {}
