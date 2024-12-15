@@ -33,9 +33,42 @@ type Query {
   getCharacterWithMostMentions: [String!]!
   getFilm(id: String!): FilmDetailsDto!
   getFilmsList(page: String!, query: String!): FilmsListDto!
+  getStarship(id: String!): StarshipDetailsDto!
+  getStarshipsList(page: String!, query: String!): StarshipsListDto!
   getUniqueWordPairs: [[String!]!]!
   getVehicle(id: String!): VehicleDetailsDto!
   getVehiclesList(page: String!, query: String!): VehiclesListDto!
+}
+
+type StarshipDetailsDto {
+  MGLT: String!
+  cargo_capacity: String!
+  consumables: String!
+  cost_in_credits: String!
+  created: String!
+  crew: String!
+  edited: String!
+  films: [String!]!
+  hyperdrive_rating: String!
+  id: String!
+  length: String!
+  manufacturer: String!
+  max_atmosphering_speed: String!
+  model: String!
+  name: String!
+  passengers: String!
+  pilots: [String!]!
+  starship_class: String!
+  url: String!
+}
+
+type StarshipsListDto {
+  count: Int!
+  isNext: Boolean!
+  isPrevious: Boolean!
+  page: Int!
+  pages: Int!
+  results: [StarshipDetailsDto!]!
 }
 
 type VehicleDetailsDto {

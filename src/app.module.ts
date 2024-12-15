@@ -7,6 +7,7 @@ import { redisStore } from 'cache-manager-redis-yet';
 import { CacheModule } from '@nestjs/cache-manager';
 import { FilmsModule } from './modules/films/films.module';
 import { VehiclesModule } from './modules/vehicles/vehicles.module';
+import { StarshipsModule } from './modules/starships/starships.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { VehiclesModule } from './modules/vehicles/vehicles.module';
     ConfigModule.forRoot(),
     FilmsModule,
     VehiclesModule,
+    StarshipsModule,
   ],
   controllers: [],
   providers: [],
