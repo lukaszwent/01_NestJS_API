@@ -2,6 +2,66 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type FilmDetailsDto {
+  characters: [String!]!
+  created: String!
+  director: String!
+  edited: String!
+  episodeId: String!
+  id: String!
+  opening_crawl: String!
+  planets: [String!]!
+  producer: String!
+  release_date: String!
+  species: [String!]!
+  starships: [String!]!
+  title: String!
+  url: String!
+  vehicles: [String!]!
+}
+
+type FilmsListDto {
+  count: Int!
+  isNext: Boolean!
+  isPrevious: Boolean!
+  page: Int!
+  pages: Int!
+  results: [FilmDetailsDto!]!
+}
+
 type Query {
-  getAppInfo: String!
+  getFilm(id: String!): FilmDetailsDto!
+  getFilmsList(page: String!, query: String!): FilmsListDto!
+  getUniqueWordPairs: [[String!]!]!
+  getVehicle(id: String!): VehicleDetailsDto!
+  getVehiclesList(page: String!, query: String!): VehiclesListDto!
+}
+
+type VehicleDetailsDto {
+  cargo_capacity: String!
+  consumables: String!
+  cost_in_credits: String!
+  created: String!
+  crew: String!
+  edited: String!
+  films: [String!]!
+  id: String!
+  length: String!
+  manufacturer: String!
+  max_atmosphering_speed: String!
+  model: String!
+  name: String!
+  passengers: String!
+  pilots: [String!]!
+  url: String!
+  vehicle_class: String!
+}
+
+type VehiclesListDto {
+  count: Int!
+  isNext: Boolean!
+  isPrevious: Boolean!
+  page: Int!
+  pages: Int!
+  results: [VehicleDetailsDto!]!
 }
