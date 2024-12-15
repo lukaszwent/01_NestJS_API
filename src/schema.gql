@@ -33,9 +33,39 @@ type Query {
   getCharacterWithMostMentions: [String!]!
   getFilm(id: String!): FilmDetailsDto!
   getFilmsList(page: String!, query: String!): FilmsListDto!
+  getSpecies(id: String!): SpeciesDetailsDto!
+  getSpeciesList(page: String!, query: String!): SpeciesListDto!
   getUniqueWordPairs: [[String!]!]!
   getVehicle(id: String!): VehicleDetailsDto!
   getVehiclesList(page: String!, query: String!): VehiclesListDto!
+}
+
+type SpeciesDetailsDto {
+  average_height: String!
+  average_lifespan: String!
+  classification: String!
+  created: String!
+  designation: String!
+  edited: String!
+  eye_colors: String!
+  films: [String!]!
+  hair_colors: String!
+  homeworld: String!
+  id: String!
+  language: String!
+  name: String!
+  people: [String!]!
+  skin_colors: String!
+  url: String!
+}
+
+type SpeciesListDto {
+  count: Int!
+  isNext: Boolean!
+  isPrevious: Boolean!
+  page: Int!
+  pages: Int!
+  results: [SpeciesDetailsDto!]!
 }
 
 type VehicleDetailsDto {
