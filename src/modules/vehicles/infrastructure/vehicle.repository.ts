@@ -9,12 +9,16 @@ export class VehicleRepository {
 
   async saveListOfVehiclesInCache(
     vehiclesListDto: VehiclesListDto,
-    query: string,
+    query?: string,
   ): Promise<void> {
-    await this.cacheManager.set(
-      `vehicles:${vehiclesListDto.page}:${query}`,
-      JSON.stringify(vehiclesListDto),
-    );
+    if (vehiclesListDto.page || query) {
+      await this.cacheManager.set(
+        `vehicles:${vehiclesListDto.page}:${query}`,
+        JSON.stringify(vehiclesListDto),
+      );
+    } else {
+      await this.cacheManager.set(`vehicles`, JSON.stringify(vehiclesListDto));
+    }
   }
 
   async saveVehicleInCache(vehicle: Vehicle) {
@@ -31,7 +35,12 @@ export class VehicleRepository {
   }
 
   async findAll(page: number, query: string): Promise<VehiclesListDto> {
-    const vehicles = await this.cacheManager.get(`vehicles:${page}:${query}`);
+    let vehicles;
+    if (page || query) {
+      vehicles = await this.cacheManager.get(`vehicles:${page}:${query}`);
+    } else {
+      vehicles = await this.cacheManager.get(`vehicles`);
+    }
 
     return vehicles ? JSON.parse(vehicles as string) : null;
   }

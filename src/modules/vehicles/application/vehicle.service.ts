@@ -37,7 +37,7 @@ export class VehicleService {
     return vehicle;
   }
 
-  async findAll(page: number, query: string): Promise<VehiclesListDto> {
+  async findAll(page?: number, query?: string): Promise<VehiclesListDto> {
     const cachedVehicles = await this.vehicleRepository.findAll(page, query);
 
     if (cachedVehicles) {
@@ -50,7 +50,7 @@ export class VehicleService {
     };
 
     if (!page) {
-      params.page = 1;
+      delete params.page;
     }
 
     if (!query) {

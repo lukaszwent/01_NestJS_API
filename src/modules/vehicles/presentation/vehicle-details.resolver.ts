@@ -8,6 +8,6 @@ export class VehicleDetailsResolver {
 
   @Query(() => VehicleDetailsDto)
   async getVehicle(@Args('id') id: string) {
-    return this.vehiclesService.findOne(id);
+    return await this.vehiclesService.findOne(id);
   }
 }

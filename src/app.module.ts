@@ -5,6 +5,7 @@ import { join } from 'path';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { redisStore } from 'cache-manager-redis-yet';
 import { CacheModule } from '@nestjs/cache-manager';
+import { FilmsModule } from './modules/films/films.module';
 import { VehiclesModule } from './modules/vehicles/vehicles.module';
 
 @Module({
@@ -30,6 +31,7 @@ import { VehiclesModule } from './modules/vehicles/vehicles.module';
       playground: true,
     }),
     ConfigModule.forRoot(),
+    FilmsModule,
     VehiclesModule,
   ],
   controllers: [],

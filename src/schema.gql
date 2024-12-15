@@ -2,7 +2,38 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type FilmDetailsDto {
+  characters: [String!]!
+  created: String!
+  director: String!
+  edited: String!
+  episodeId: String!
+  id: String!
+  opening_crawl: String!
+  planets: [String!]!
+  producer: String!
+  release_date: String!
+  species: [String!]!
+  starships: [String!]!
+  title: String!
+  url: String!
+  vehicles: [String!]!
+}
+
+type FilmsListDto {
+  count: Int!
+  isNext: Boolean!
+  isPrevious: Boolean!
+  page: Int!
+  pages: Int!
+  results: [FilmDetailsDto!]!
+}
+
 type Query {
+  getCharacterWithMostMentions: [String!]!
+  getFilm(id: String!): FilmDetailsDto!
+  getFilmsList(page: String!, query: String!): FilmsListDto!
+  getUniqueWordPairs: [[String!]!]!
   getVehicle(id: String!): VehicleDetailsDto!
   getVehiclesList(page: String!, query: String!): VehiclesListDto!
 }
