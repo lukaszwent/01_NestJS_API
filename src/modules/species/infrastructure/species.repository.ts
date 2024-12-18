@@ -1,43 +1,48 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Species } from '../entity/species.entity';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
-import { SpeciesListDto } from '../dto/species-list.dto';
+import { ExternalListResponse } from 'src/common/interfaces/external-list-response.interface';
+import { ExternalSpecies } from '../interfaces/external-species.interface';
+import { ExternalItemResponse } from 'src/common/interfaces/external-item-response.interface';
 
 @Injectable()
 export class SpeciesRepository {
   constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
 
   async saveListOfSpeciesInCache(
-    speciesListDto: SpeciesListDto,
-    query?: string,
+    species: ExternalListResponse<ExternalSpecies>,
+    page?: number,
+    limit?: number,
   ): Promise<void> {
-    if (speciesListDto.page || query) {
+    if (page || limit) {
       await this.cacheManager.set(
-        `species:${speciesListDto.page}:${query}`,
-        JSON.stringify(speciesListDto),
+        `species:${page}:${limit}`,
+        JSON.stringify(species),
       );
     } else {
-      await this.cacheManager.set(`species`, JSON.stringify(speciesListDto));
+      await this.cacheManager.set(`species`, JSON.stringify(species));
     }
   }
 
-  async saveSpeciesInCache(species: Species) {
+  async saveSpeciesInCache(species: ExternalItemResponse<ExternalSpecies>) {
     await this.cacheManager.set(
-      `species:${species.id}`,
+      `species:${species.result.uid}`,
       JSON.stringify(species),
     );
   }
 
-  async findOne(id: string): Promise<Species> {
+  async findOne(id: string): Promise<ExternalItemResponse<ExternalSpecies>> {
     const species = await this.cacheManager.get(`species:${id}`);
 
     return species ? JSON.parse(species as string) : null;
   }
 
-  async findAll(page: number, query: string): Promise<SpeciesListDto> {
+  async findAll(
+    page?: number,
+    limit?: number,
+  ): Promise<ExternalListResponse<ExternalSpecies>> {
     let species;
-    if (page || query) {
-      species = await this.cacheManager.get(`species:${page}:${query}`);
+    if (page || limit) {
+      species = await this.cacheManager.get(`species:${page}:${limit}`);
     } else {
       species = await this.cacheManager.get(`species`);
     }

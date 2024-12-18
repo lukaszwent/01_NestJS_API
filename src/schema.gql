@@ -59,10 +59,10 @@ type Query {
   getCharacterWithMostMentions: [String!]!
   getFilm(id: String!): FilmDetailsDto!
   getFilmsList(page: String!, query: String!): FilmsListDto!
-  getSpecies(id: String!): SpeciesDetailsDto!
-  getSpeciesList(page: String!, query: String!): SpeciesListDto!
   getPlanet(id: String!): PlanetDetailsDto!
-  getPlanetsList(limit: Float = 10, page: String = "1"): PlanetsListDto!
+  getPlanetsList(limit: Float = 10, page: Float! = 1): PlanetsListDto!
+  getSpecies(id: String!): SpeciesDetailsDto!
+  getSpeciesList(limit: Float! = 10, page: Float! = 1): SpeciesListDto!
   getUniqueWordPairs: [[String!]!]!
   getVehicle(id: String!): VehicleDetailsDto!
   getVehiclesList(page: String!, query: String!): VehiclesListDto!
@@ -76,7 +76,6 @@ type SpeciesDetailsDto {
   designation: String!
   edited: String!
   eye_colors: String!
-  films: [String!]!
   hair_colors: String!
   homeworld: String!
   id: String!
@@ -91,6 +90,7 @@ type SpeciesListDto {
   count: Int!
   isNext: Boolean!
   isPrevious: Boolean!
+  limit: Float!
   page: Int!
   pages: Int!
   results: [SpeciesDetailsDto!]!

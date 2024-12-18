@@ -8,9 +8,9 @@ export class SpeciesListResolver {
 
   @Query(() => SpeciesListDto)
   async getSpeciesList(
-    @Args('page') page: string,
-    @Args('query') searchQuery: string,
+    @Args('page', { defaultValue: 1 }) page: number = 1,
+    @Args('limit', { defaultValue: 10 }) limit: number = 10,
   ) {
-    return await this.speciesService.findAll(+page, searchQuery);
+    return await this.speciesService.findAll(+page, limit);
   }
 }

@@ -18,16 +18,16 @@ export class SpeciesDetailsDto {
   average_height: string;
 
   @Field(() => String)
-  skin_colors: string;
+  average_lifespan: string;
 
   @Field(() => String)
   hair_colors: string;
 
   @Field(() => String)
-  eye_colors: string;
+  skin_colors: string;
 
   @Field(() => String)
-  average_lifespan: string;
+  eye_colors: string;
 
   @Field(() => String)
   homeworld: string;
@@ -37,9 +37,6 @@ export class SpeciesDetailsDto {
 
   @Field(() => [String])
   people: string[];
-
-  @Field(() => [String])
-  films: string[];
 
   @Field(() => String)
   created: string;

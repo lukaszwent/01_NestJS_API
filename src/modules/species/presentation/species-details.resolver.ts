@@ -1,6 +1,6 @@
 import { Args, Resolver, Query } from '@nestjs/graphql';
-import { SpeciesDetailsDto } from '../dto/species-details.dto';
 import { SpeciesService } from '../application/species.service';
+import { SpeciesDetailsDto } from '../dto/species-details.dto';
 
 @Resolver(() => SpeciesDetailsDto)
 export class SpeciesDetailsResolver {

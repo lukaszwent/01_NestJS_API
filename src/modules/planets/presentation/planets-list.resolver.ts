@@ -8,7 +8,7 @@ export class PlanetsListResolver {
 
   @Query(() => PlanetsListDto)
   async getPlanetsList(
-    @Args('page', { defaultValue: 1, nullable: true }) page: string = '1',
+    @Args('page', { defaultValue: 1 }) page: number = 1,
     @Args('limit', { defaultValue: 10, nullable: true }) limit: number = 10,
   ) {
     return await this.planetsService.findAll(+page, limit);

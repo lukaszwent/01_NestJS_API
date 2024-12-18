@@ -41,7 +41,7 @@ describe('PlanetsListResolver', () => {
       };
       jest.spyOn(service, 'findAll').mockResolvedValue(result);
 
-      expect(await resolver.getPlanetsList('1', 10)).toBe(result);
+      expect(await resolver.getPlanetsList(1, 10)).toBe(result);
       expect(service.findAll).toHaveBeenCalledWith(1, 10);
     });
 

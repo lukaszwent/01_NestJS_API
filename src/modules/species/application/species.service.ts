@@ -1,80 +1,65 @@
+import { SpeciesMapper } from '../species.mapper';
 import { SpeciesRepository } from '../infrastructure/species.repository';
-import { Injectable, Logger } from '@nestjs/common';
-import { HttpService } from '@nestjs/axios';
-import { catchError, firstValueFrom } from 'rxjs';
-import { AxiosError } from 'axios';
-import { SpeciesDetailsDto } from '../dto/species-details.dto';
+import { Injectable } from '@nestjs/common';
 import { SpeciesListDto } from '../dto/species-list.dto';
-import { Species } from '../entity/species.entity';
+import { SpeciesDetailsDto } from '../dto/species-details.dto';
+import { ExternalSpecies } from '../interfaces/external-species.interface';
+import { HttpClientService } from '../../../common/services/http-client.service';
 
 @Injectable()
 export class SpeciesService {
-  private readonly logger = new Logger(SpeciesService.name);
-
   constructor(
-    private http: HttpService,
     private speciesRepository: SpeciesRepository,
+    private speciesMapper: SpeciesMapper,
+    private httpClient: HttpClientService,
   ) {}
 
   async findOne(id: string): Promise<SpeciesDetailsDto> {
     const cachedSpecies = await this.speciesRepository.findOne(id);
 
     if (cachedSpecies) {
-      return cachedSpecies;
+      return this.speciesMapper.mapDetailsToDTO(cachedSpecies);
     }
 
-    const { data: species } = await firstValueFrom(
-      this.http.get<Species>(process.env.API_URL + '/species/' + id).pipe(
-        catchError((error: AxiosError) => {
-          this.logger.error(error.response.data);
-          throw 'Something went wrong while fetching species';
-        }),
-      ),
+    const species = await this.httpClient.getOne<ExternalSpecies>(
+      `species/${id}`,
     );
 
     this.speciesRepository.saveSpeciesInCache(species);
 
-    return species;
+    return this.speciesMapper.mapDetailsToDTO(species);
   }
 
-  async findAll(page?: number, query?: string): Promise<SpeciesListDto> {
-    const cachedSpecies = await this.speciesRepository.findAll(page, query);
+  async findAll(page: number, limit: number): Promise<SpeciesListDto> {
+    const cachedSpecies = await this.speciesRepository.findAll(page, limit);
 
     if (cachedSpecies) {
-      return cachedSpecies;
+      return this.speciesMapper.mapListToDTO(cachedSpecies, { limit, page });
     }
 
     const params = {
       page: page,
-      search: query,
+      limit: limit,
     };
 
     if (!page) {
       delete params.page;
     }
-
-    if (!query) {
-      delete params.search;
+    if (!limit) {
+      delete params.limit;
     }
 
-    const { data } = await firstValueFrom(
-      this.http.get(process.env.API_URL + '/species', { params }).pipe(
-        catchError((error: AxiosError) => {
-          this.logger.error(error.response.data);
-          throw 'Something went wrong while fetching species';
-        }),
-      ),
+    const species = await this.httpClient.getAll<ExternalSpecies>(
+      'species',
+      params,
     );
 
-    const speciesListDto = new SpeciesListDto();
-    speciesListDto.results = data.results;
-    speciesListDto.isNext = data.next !== null;
-    speciesListDto.isPrevious = data.previous !== null;
-    speciesListDto.count = data.count;
-    speciesListDto.page = page;
-    speciesListDto.pages = Math.ceil(data.count / 10);
+    const speciesListDto = this.speciesMapper.mapListToDTO(species, {
+      limit,
+      page,
+    });
 
-    this.speciesRepository.saveListOfSpeciesInCache(data, query);
+    this.speciesRepository.saveListOfSpeciesInCache(species, page, limit);
 
     return speciesListDto;
   }

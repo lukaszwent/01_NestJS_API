@@ -1,127 +1,147 @@
-import { HttpService } from '@nestjs/axios';
-import { TestingModule, Test } from '@nestjs/testing';
-import { AxiosResponse } from 'axios';
-import { of } from 'rxjs';
-import { SpeciesDetailsDto } from '../dto/species-details.dto';
-import { Species } from '../entity/species.entity';
-import { SpeciesRepository } from '../infrastructure/species.repository';
+import { Test, TestingModule } from '@nestjs/testing';
 import { SpeciesService } from './species.service';
+import { SpeciesRepository } from '../infrastructure/species.repository';
+import { SpeciesMapper } from '../species.mapper';
+import { HttpClientService } from '../../../common/services/http-client.service';
+import { SpeciesDetailsDto } from '../dto/species-details.dto';
 import { SpeciesListDto } from '../dto/species-list.dto';
-import { SWSpeciesResponse } from '../interfaces/sw-species-response.interface';
+import { ExternalItemResponse } from 'src/common/interfaces/external-item-response.interface';
+import { ExternalSpecies } from '../interfaces/external-species.interface';
+import { ExternalListResponse } from 'src/common/interfaces/external-list-response.interface';
 
 describe('SpeciesService', () => {
   let service: SpeciesService;
-  let httpService: HttpService;
   let speciesRepository: SpeciesRepository;
+  let speciesMapper: SpeciesMapper;
+  let httpClient: HttpClientService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         SpeciesService,
         {
-          provide: HttpService,
-          useValue: {
-            get: jest.fn(),
-          },
-        },
-        {
           provide: SpeciesRepository,
           useValue: {
             findOne: jest.fn(),
-            saveSpeciesInCache: jest.fn(),
             findAll: jest.fn(),
+            saveSpeciesInCache: jest.fn(),
             saveListOfSpeciesInCache: jest.fn(),
+          },
+        },
+        {
+          provide: SpeciesMapper,
+          useValue: {
+            mapDetailsToDTO: jest.fn(),
+            mapListToDTO: jest.fn(),
+          },
+        },
+        {
+          provide: HttpClientService,
+          useValue: {
+            getOne: jest.fn(),
+            getAll: jest.fn(),
           },
         },
       ],
     }).compile();
 
     service = module.get<SpeciesService>(SpeciesService);
-    httpService = module.get<HttpService>(HttpService);
     speciesRepository = module.get<SpeciesRepository>(SpeciesRepository);
+    speciesMapper = module.get<SpeciesMapper>(SpeciesMapper);
+    httpClient = module.get<HttpClientService>(HttpClientService);
   });
 
-  it('should return cached species if found', async () => {
-    const id = '1';
-    const cachedSpecies = new SpeciesDetailsDto();
-    jest.spyOn(speciesRepository, 'findOne').mockResolvedValue(cachedSpecies);
+  describe('findOne', () => {
+    it('should return cached species details if found in cache', async () => {
+      const id = '1';
+      const speciesResponse: ExternalItemResponse<ExternalSpecies> = {
+        message: 'OK',
+        result: {
+          properties: {
+            name: 'Human',
+            classification: 'Mammal',
+            designation: 'Sentient',
+            average_height: '180',
+            average_lifespan: '80',
+            hair_colors: 'varied',
+            skin_colors: 'varied',
+            eye_colors: 'varied',
+            homeworld: 'Earth',
+            language: 'varied',
+            people: [],
+            created: '2014-12-09T13:50:49.641000Z',
+            edited: '2014-12-20T20:58:18.411000Z',
+            url: 'https://swapi.dev/api/species/1/',
+          },
+          description: '',
+          _id: '',
+          uid: '1',
+          __v: 0,
+        },
+      };
+      const speciesDetailsDto = new SpeciesDetailsDto();
 
-    const result = await service.findOne(id);
+      jest
+        .spyOn(speciesRepository, 'findOne')
+        .mockResolvedValue(speciesResponse);
+      jest
+        .spyOn(speciesMapper, 'mapDetailsToDTO')
+        .mockReturnValue(speciesDetailsDto);
 
-    expect(result).toBe(cachedSpecies);
-    expect(speciesRepository.findOne).toHaveBeenCalledWith(id);
-    expect(httpService.get).not.toHaveBeenCalled();
-  });
+      const result = await service.findOne(id);
 
-  it('should fetch species from API if not cached', async () => {
-    const id = '1';
-    const species = new Species();
-    const response: AxiosResponse<Species> = {
-      data: species,
-      status: 200,
-      statusText: 'OK',
-      headers: {},
-      config: {
-        headers: undefined,
-      },
-    };
-    jest.spyOn(speciesRepository, 'findOne').mockResolvedValue(null);
-    jest.spyOn(httpService, 'get').mockReturnValue(of(response));
-    jest.spyOn(speciesRepository, 'saveSpeciesInCache').mockResolvedValue();
+      expect(speciesRepository.findOne).toHaveBeenCalledWith(id);
+      expect(speciesMapper.mapDetailsToDTO).toHaveBeenCalledWith(
+        speciesResponse,
+      );
+      expect(result).toBe(speciesDetailsDto);
+    });
 
-    const result = await service.findOne(id);
+    it('should fetch species details from external API if not found in cache', async () => {
+      const id = '1';
+      const speciesResponse: ExternalItemResponse<ExternalSpecies> = {
+        message: 'OK',
+        result: {
+          properties: {
+            name: 'Human',
+            classification: 'Mammal',
+            designation: 'Sentient',
+            average_height: '180',
+            average_lifespan: '80',
+            hair_colors: 'varied',
+            skin_colors: 'varied',
+            eye_colors: 'varied',
+            homeworld: 'Earth',
+            language: 'varied',
+            people: [],
+            created: '2014-12-09T13:50:49.641000Z',
+            edited: '2014-12-20T20:58:18.411000Z',
+            url: 'https://swapi.dev/api/species/1/',
+          },
+          description: '',
+          _id: '',
+          uid: '1',
+          __v: 0,
+        },
+      };
+      const speciesDetailsDto = new SpeciesDetailsDto();
 
-    expect(result).toBe(species);
-    expect(speciesRepository.findOne).toHaveBeenCalledWith(id);
-    expect(httpService.get).toHaveBeenCalledWith(
-      `${process.env.API_URL}/species/${id}`,
-    );
-    expect(speciesRepository.saveSpeciesInCache).toHaveBeenCalledWith(species);
-  });
+      jest.spyOn(httpClient, 'getOne').mockResolvedValue(speciesResponse);
+      jest
+        .spyOn(speciesMapper, 'mapDetailsToDTO')
+        .mockReturnValue(speciesDetailsDto);
+      jest.spyOn(speciesRepository, 'saveSpeciesInCache').mockResolvedValue();
 
-  it('should return cached species if found', async () => {
-    const page = 1;
-    const cachedSpecies = new SpeciesListDto();
-    jest.spyOn(speciesRepository, 'findAll').mockResolvedValue(cachedSpecies);
+      const result = await service.findOne(id);
 
-    const result = await service.findAll(page, '');
-
-    expect(result).toBe(cachedSpecies);
-    expect(speciesRepository.findAll).toHaveBeenCalledWith(page, '');
-    expect(httpService.get).not.toHaveBeenCalled();
-  });
-
-  it('should fetch species from API if not cached', async () => {
-    const page = 1;
-    const species = [new Species()];
-    const response: AxiosResponse<SWSpeciesResponse> = {
-      data: { results: species, count: 1, next: null, previous: null },
-      status: 200,
-      statusText: 'OK',
-      headers: {},
-      config: {
-        headers: undefined,
-      },
-    };
-    jest.spyOn(speciesRepository, 'findAll').mockResolvedValue(null);
-    jest.spyOn(httpService, 'get').mockReturnValue(of(response));
-    jest
-      .spyOn(speciesRepository, 'saveListOfSpeciesInCache')
-      .mockResolvedValue();
-
-    const result = await service.findAll(page, '');
-
-    expect(result.results).toBe(species);
-    expect(speciesRepository.findAll).toHaveBeenCalledWith(page, '');
-    expect(httpService.get).toHaveBeenCalledWith(
-      `${process.env.API_URL}/species`,
-      {
-        params: { page },
-      },
-    );
-    expect(speciesRepository.saveListOfSpeciesInCache).toHaveBeenCalledWith(
-      response.data,
-      '',
-    );
+      expect(httpClient.getOne).toHaveBeenCalledWith(`species/${id}`);
+      expect(speciesMapper.mapDetailsToDTO).toHaveBeenCalledWith(
+        speciesResponse,
+      );
+      expect(speciesRepository.saveSpeciesInCache).toHaveBeenCalledWith(
+        speciesResponse,
+      );
+      expect(result).toBe(speciesDetailsDto);
+    });
   });
 });

@@ -3,8 +3,8 @@ import { INestApplication } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TestingModule, Test } from '@nestjs/testing';
 import * as request from 'supertest';
-import { SpeciesService } from '../application/species.service';
 import { SpeciesDetailsResolver } from './species-details.resolver';
+import { SpeciesService } from '../application/species.service';
 
 describe('SpeciesDetailsResolver (e2e)', () => {
   let app: INestApplication;
