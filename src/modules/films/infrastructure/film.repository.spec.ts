@@ -1,15 +1,16 @@
+import {
+  CustomFilmsResponse,
+  CustomFilmsResult,
+} from './../interfaces/custom-films-response.interface';
 import { TestingModule, Test } from '@nestjs/testing';
 import { FilmRepository } from './film.repository';
 import { CacheModule } from '@nestjs/cache-manager';
-import { ExternalListResponse } from 'src/common/interfaces/external-list-response.interface';
-import { ExternalFilm } from '../interfaces/external-film.interface';
-import { ExternalItemResponse } from 'src/common/interfaces/external-item-response.interface';
 import { FilmDetailsDto } from '../dto/film-details.dto';
 
 describe('FilmRepository', () => {
   let repository: FilmRepository;
-  let detailsResponse: ExternalItemResponse<ExternalFilm>;
-  let listResponse: ExternalListResponse<ExternalFilm>;
+  let detailsResponse: CustomFilmsResult;
+  let listResponse: CustomFilmsResponse;
   let film: FilmDetailsDto;
 
   beforeEach(async () => {
@@ -37,19 +38,16 @@ describe('FilmRepository', () => {
     film.url = 'https://swapi.dev/api/films/1/';
 
     detailsResponse = {
-      message: '',
-      result: {
-        properties: film,
-        description: '',
-        _id: '',
-        uid: '1',
-        __v: 0,
-      },
+      properties: film,
+      description: '',
+      _id: '',
+      uid: '1',
+      __v: 0,
     };
 
     listResponse = {
       message: 'Success',
-      results: [film],
+      result: [detailsResponse],
       total_records: 2,
       total_pages: 1,
       previous: null,
@@ -64,13 +62,24 @@ describe('FilmRepository', () => {
   it('should return an array of films', async () => {
     await repository.saveListOfFilmsInCache(listResponse, 1);
     const films = await repository.findAll(1);
-    expect(films.results).toBeInstanceOf(Array);
+    expect(films.result).toBeInstanceOf(Array);
   });
 
   it('should return a single film', async () => {
+    const detailsResponse = {
+      message: '',
+      result: {
+        properties: film,
+        description: '',
+        _id: '',
+        uid: '1',
+        __v: 0,
+      },
+    };
+
     await repository.saveFilmInCache(detailsResponse);
-    const film = await repository.findOne('1');
-    expect(film).toBeInstanceOf(Object);
-    expect(film.result.uid).toBe('1');
+    const cachedFilm = await repository.findOne('1');
+    expect(cachedFilm).toBeInstanceOf(Object);
+    expect(cachedFilm.result.uid).toBe('1');
   });
 });

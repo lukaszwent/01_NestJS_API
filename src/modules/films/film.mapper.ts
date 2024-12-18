@@ -1,40 +1,34 @@
 import { Injectable } from '@nestjs/common';
-import { ExternalListResponse } from 'src/common/interfaces/external-list-response.interface';
+import {} from 'src/common/interfaces/external-list-response.interface';
 import { FilmsListDto } from './dto/films-list.dto';
 import { FilmDetailsDto } from './dto/film-details.dto';
 import { ExternalFilm } from './interfaces/external-film.interface';
 import { ExternalItemResponse } from 'src/common/interfaces/external-item-response.interface';
+import { CustomFilmsResponse } from './interfaces/custom-films-response.interface';
+import { UniqueWordPairsDto } from './dto/unique-word-pairs-dto';
+import { CharacterWithMostMentionsDto } from './dto/character-with-most-mentions.dto';
 
 @Injectable()
 export class FilmMapper {
-  mapListToDTO(
-    films: ExternalListResponse<ExternalFilm>,
-    params: { limit: number; page: number },
-  ): FilmsListDto {
+  mapListToDTO(films: CustomFilmsResponse): FilmsListDto {
     const filmsDTO = new FilmsListDto();
-    filmsDTO.count = films.total_records;
-    filmsDTO.isNext = !!films.next;
-    filmsDTO.isPrevious = !!films.previous;
-    filmsDTO.limit = params.limit;
-    filmsDTO.page = params.page;
-    filmsDTO.pages = films.total_pages;
-    filmsDTO.results = films.results.map((item) => {
+    filmsDTO.results = films.result.map((item) => {
       const film = new FilmDetailsDto();
-      film.id = item.id;
-      film.title = item.title;
-      film.episode_id = item.episode_id;
-      film.opening_crawl = item.opening_crawl;
-      film.director = item.director;
-      film.producer = item.producer;
-      film.release_date = item.release_date;
-      film.characters = item.characters;
-      film.planets = item.planets;
-      film.starships = item.starships;
-      film.vehicles = item.vehicles;
-      film.species = item.species;
-      film.created = item.created;
-      film.edited = item.edited;
-      film.url = item.url;
+      film.id = item.properties.id;
+      film.title = item.properties.title;
+      film.episode_id = item.properties.episode_id;
+      film.opening_crawl = item.properties.opening_crawl;
+      film.director = item.properties.director;
+      film.producer = item.properties.producer;
+      film.release_date = item.properties.release_date;
+      film.characters = item.properties.characters;
+      film.planets = item.properties.planets;
+      film.starships = item.properties.starships;
+      film.vehicles = item.properties.vehicles;
+      film.species = item.properties.species;
+      film.created = item.properties.created;
+      film.edited = item.properties.edited;
+      film.url = item.properties.url;
       return film;
     });
     return filmsDTO;
@@ -58,5 +52,21 @@ export class FilmMapper {
     filmDetails.edited = film.result.properties.edited;
     filmDetails.url = film.result.properties.url;
     return filmDetails;
+  }
+
+  mapUniqueWordPairsToDTO(
+    uniqueWordPairs: (string | number)[][],
+  ): UniqueWordPairsDto {
+    const uniqueWordPairsDto = new UniqueWordPairsDto();
+    uniqueWordPairsDto.uniqueWordPairs = uniqueWordPairs;
+    return uniqueWordPairsDto;
+  }
+
+  mapCharacterWithMostMentionsToDTO(
+    character: string[],
+  ): CharacterWithMostMentionsDto {
+    const characterDto = new CharacterWithMostMentionsDto();
+    characterDto.character = character;
+    return characterDto;
   }
 }

@@ -1,15 +1,15 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
-import { ExternalListResponse } from 'src/common/interfaces/external-list-response.interface';
 import { ExternalFilm } from '../interfaces/external-film.interface';
 import { ExternalItemResponse } from 'src/common/interfaces/external-item-response.interface';
+import { CustomFilmsResponse } from '../interfaces/custom-films-response.interface';
 
 @Injectable()
 export class FilmRepository {
   constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
 
   async saveListOfFilmsInCache(
-    films: ExternalListResponse<ExternalFilm>,
+    films: CustomFilmsResponse,
     page?: number,
     limit?: number,
   ): Promise<void> {
@@ -50,10 +50,7 @@ export class FilmRepository {
     return film ? JSON.parse(film as string) : null;
   }
 
-  async findAll(
-    page?: number,
-    limit?: number,
-  ): Promise<ExternalListResponse<ExternalFilm>> {
+  async findAll(page?: number, limit?: number): Promise<CustomFilmsResponse> {
     let films;
     if (page || limit) {
       films = await this.cacheManager.get(`films:${page}:${limit}`);

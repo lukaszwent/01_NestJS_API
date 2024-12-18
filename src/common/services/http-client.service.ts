@@ -28,7 +28,7 @@ export class HttpClientService {
           map((response) => response.data),
           map(async (data) => {
             const results = await Promise.all(
-              data.results?.map(async (results) => {
+              data.results.map(async (results) => {
                 const details = (
                   await this.getOne<T>(`${path_model}/${results.uid}`)
                 ).result?.properties;
