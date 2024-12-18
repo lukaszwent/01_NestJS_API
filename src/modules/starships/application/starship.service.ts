@@ -1,80 +1,65 @@
+import { StarshipMapper } from '../starship.mapper';
 import { StarshipRepository } from '../infrastructure/starship.repository';
-import { Injectable, Logger } from '@nestjs/common';
-import { HttpService } from '@nestjs/axios';
-import { catchError, firstValueFrom } from 'rxjs';
-import { AxiosError } from 'axios';
-import { Starship } from '../entity/starship.entity';
-import { StarshipDetailsDto } from '../dto/starship-details.dto';
+import { Injectable } from '@nestjs/common';
 import { StarshipsListDto } from '../dto/starships-list.dto';
+import { StarshipDetailsDto } from '../dto/starship-details.dto';
+import { ExternalStarship } from '../interfaces/external-starship.interface';
+import { HttpClientService } from '../../../common/services/http-client.service';
 
 @Injectable()
 export class StarshipService {
-  private readonly logger = new Logger(StarshipService.name);
-
   constructor(
-    private http: HttpService,
     private starshipRepository: StarshipRepository,
+    private starshipMapper: StarshipMapper,
+    private httpClient: HttpClientService,
   ) {}
 
   async findOne(id: string): Promise<StarshipDetailsDto> {
     const cachedStarship = await this.starshipRepository.findOne(id);
 
     if (cachedStarship) {
-      return cachedStarship;
+      return this.starshipMapper.mapDetailsToDTO(cachedStarship);
     }
 
-    const { data: starship } = await firstValueFrom(
-      this.http.get<Starship>(process.env.API_URL + '/starships/' + id).pipe(
-        catchError((error: AxiosError) => {
-          this.logger.error(error.response.data);
-          throw 'Something went wrong while fetching starship';
-        }),
-      ),
+    const starship = await this.httpClient.getOne<ExternalStarship>(
+      `starships/${id}`,
     );
 
     this.starshipRepository.saveStarshipInCache(starship);
 
-    return starship;
+    return this.starshipMapper.mapDetailsToDTO(starship);
   }
 
-  async findAll(page?: number, query?: string): Promise<StarshipsListDto> {
-    const cachedStarships = await this.starshipRepository.findAll(page, query);
+  async findAll(page: number, limit: number): Promise<StarshipsListDto> {
+    const cachedStarships = await this.starshipRepository.findAll(page, limit);
 
     if (cachedStarships) {
-      return cachedStarships;
+      return this.starshipMapper.mapListToDTO(cachedStarships, { limit, page });
     }
 
     const params = {
       page: page,
-      search: query,
+      limit: limit,
     };
 
     if (!page) {
       delete params.page;
     }
-
-    if (!query) {
-      delete params.search;
+    if (!limit) {
+      delete params.limit;
     }
 
-    const { data } = await firstValueFrom(
-      this.http.get(process.env.API_URL + '/starships', { params }).pipe(
-        catchError((error: AxiosError) => {
-          this.logger.error(error.response.data);
-          throw 'Something went wrong while fetching starships';
-        }),
-      ),
+    const starships = await this.httpClient.getAll<ExternalStarship>(
+      'starships',
+      params,
     );
 
-    const starshipsListDto = new StarshipsListDto();
-    starshipsListDto.results = data.results;
-    starshipsListDto.isNext = data.next !== null;
-    starshipsListDto.isPrevious = data.previous !== null;
-    starshipsListDto.count = data.count;
-    starshipsListDto.page = page;
-    starshipsListDto.pages = Math.ceil(data.count / 10);
+    const starshipsListDto = this.starshipMapper.mapListToDTO(starships, {
+      limit,
+      page,
+    });
 
-    this.starshipRepository.saveListOfStarshipsInCache(data, query);
+    this.starshipRepository.saveListOfStarshipsInCache(starships, page, limit);
 
     return starshipsListDto;
   }

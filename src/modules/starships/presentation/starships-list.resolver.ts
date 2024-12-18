@@ -8,9 +8,9 @@ export class StarshipsListResolver {
 
   @Query(() => StarshipsListDto)
   async getStarshipsList(
-    @Args('page') page: string,
-    @Args('query') searchQuery: string,
+    @Args('page', { defaultValue: 1 }) page: number = 1,
+    @Args('limit', { defaultValue: 10, nullable: true }) limit: number = 10,
   ) {
-    return await this.starshipsService.findAll(+page, searchQuery);
+    return await this.starshipsService.findAll(page, limit);
   }
 }

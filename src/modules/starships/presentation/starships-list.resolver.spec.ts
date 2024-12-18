@@ -1,11 +1,11 @@
-import { TestingModule, Test } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
+import { StarshipsListResolver } from './starships-list.resolver';
 import { StarshipService } from '../application/starship.service';
 import { StarshipsListDto } from '../dto/starships-list.dto';
-import { StarshipsListResolver } from './starships-list.resolver';
 
 describe('StarshipsListResolver', () => {
   let resolver: StarshipsListResolver;
-  let starshipService: StarshipService;
+  let service: StarshipService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -21,32 +21,44 @@ describe('StarshipsListResolver', () => {
     }).compile();
 
     resolver = module.get<StarshipsListResolver>(StarshipsListResolver);
-    starshipService = module.get<StarshipService>(StarshipService);
+    service = module.get<StarshipService>(StarshipService);
   });
 
   it('should be defined', () => {
     expect(resolver).toBeDefined();
   });
 
-  it('should return a list of starships', async () => {
-    const result: StarshipsListDto = new StarshipsListDto();
-    result.count = 0;
-    result.isNext = false;
-    result.isPrevious = false;
-    result.results = [];
-    result.page = 1;
-    result.pages = 1;
+  describe('getStarshipsList', () => {
+    it('should return a list of starships', async () => {
+      const result: StarshipsListDto = {
+        count: 1,
+        isNext: null,
+        isPrevious: null,
+        results: [],
+        page: 1,
+        pages: 1,
+        limit: 10,
+      };
+      jest.spyOn(service, 'findAll').mockResolvedValue(result);
 
-    jest.spyOn(starshipService, 'findAll').mockResolvedValue(result);
-
-    expect(await resolver.getStarshipsList('1', '')).toEqual({
-      count: 0,
-      isNext: false,
-      isPrevious: false,
-      results: [],
-      page: 1,
-      pages: 1,
+      expect(await resolver.getStarshipsList(1, 10)).toBe(result);
+      expect(service.findAll).toHaveBeenCalledWith(1, 10);
     });
-    expect(starshipService.findAll).toHaveBeenCalledWith(1, '');
+
+    it('should use default values for page and limit', async () => {
+      const result: StarshipsListDto = {
+        count: 1,
+        isNext: null,
+        isPrevious: null,
+        results: [],
+        page: 1,
+        pages: 1,
+        limit: 10,
+      };
+      jest.spyOn(service, 'findAll').mockResolvedValue(result);
+
+      expect(await resolver.getStarshipsList()).toBe(result);
+      expect(service.findAll).toHaveBeenCalledWith(1, 10);
+    });
   });
 });

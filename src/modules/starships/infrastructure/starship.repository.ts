@@ -1,46 +1,48 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
-import { StarshipsListDto } from '../dto/starships-list.dto';
-import { Starship } from '../entity/starship.entity';
+import { ExternalListResponse } from 'src/common/interfaces/external-list-response.interface';
+import { ExternalStarship } from '../interfaces/external-starship.interface';
+import { ExternalItemResponse } from 'src/common/interfaces/external-item-response.interface';
 
 @Injectable()
 export class StarshipRepository {
   constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
 
   async saveListOfStarshipsInCache(
-    starshipsListDto: StarshipsListDto,
-    query?: string,
+    starships: ExternalListResponse<ExternalStarship>,
+    page?: number,
+    limit?: number,
   ): Promise<void> {
-    if (starshipsListDto.page || query) {
+    if (page || limit) {
       await this.cacheManager.set(
-        `starships:${starshipsListDto.page}:${query}`,
-        JSON.stringify(starshipsListDto),
+        `starships:${page}:${limit}`,
+        JSON.stringify(starships),
       );
     } else {
-      await this.cacheManager.set(
-        `starships`,
-        JSON.stringify(starshipsListDto),
-      );
+      await this.cacheManager.set(`starships`, JSON.stringify(starships));
     }
   }
 
-  async saveStarshipInCache(starship: Starship) {
+  async saveStarshipInCache(starship: ExternalItemResponse<ExternalStarship>) {
     await this.cacheManager.set(
-      `starship:${starship.id}`,
+      `starship:${starship.result.uid}`,
       JSON.stringify(starship),
     );
   }
 
-  async findOne(id: string): Promise<Starship> {
+  async findOne(id: string): Promise<ExternalItemResponse<ExternalStarship>> {
     const starship = await this.cacheManager.get(`starship:${id}`);
 
     return starship ? JSON.parse(starship as string) : null;
   }
 
-  async findAll(page: number, query: string): Promise<StarshipsListDto> {
+  async findAll(
+    page?: number,
+    limit?: number,
+  ): Promise<ExternalListResponse<ExternalStarship>> {
     let starships;
-    if (page || query) {
-      starships = await this.cacheManager.get(`starships:${page}:${query}`);
+    if (page || limit) {
+      starships = await this.cacheManager.get(`starships:${page}:${limit}`);
     } else {
       starships = await this.cacheManager.get(`starships`);
     }

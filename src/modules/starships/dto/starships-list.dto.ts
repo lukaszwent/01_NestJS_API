@@ -20,4 +20,7 @@ export class StarshipsListDto {
 
   @Field(() => [StarshipDetailsDto])
   results: StarshipDetailsDto[];
+
+  @Field(() => Number)
+  limit: number;
 }

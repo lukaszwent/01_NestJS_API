@@ -12,6 +12,9 @@ export class StarshipDetailsDto {
   model: string;
 
   @Field(() => String)
+  starship_class: string;
+
+  @Field(() => String)
   manufacturer: string;
 
   @Field(() => String)
@@ -21,19 +24,13 @@ export class StarshipDetailsDto {
   length: string;
 
   @Field(() => String)
-  max_atmosphering_speed: string;
-
-  @Field(() => String)
   crew: string;
 
   @Field(() => String)
   passengers: string;
 
   @Field(() => String)
-  cargo_capacity: string;
-
-  @Field(() => String)
-  consumables: string;
+  max_atmosphering_speed: string;
 
   @Field(() => String)
   hyperdrive_rating: string;
@@ -42,13 +39,13 @@ export class StarshipDetailsDto {
   MGLT: string;
 
   @Field(() => String)
-  starship_class: string;
+  cargo_capacity: string;
+
+  @Field(() => String)
+  consumables: string;
 
   @Field(() => [String])
   pilots: string[];
-
-  @Field(() => [String])
-  films: string[];
 
   @Field(() => String)
   created: string;
