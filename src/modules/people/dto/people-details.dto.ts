@@ -1,7 +1,7 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
-export class VehicleDetailsDto {
+export class PeopleDetailsDto {
   @Field(() => String)
   id: string;
 
@@ -9,40 +9,28 @@ export class VehicleDetailsDto {
   name: string;
 
   @Field(() => String)
-  model: string;
+  height: string;
 
   @Field(() => String)
-  vehicle_class: string;
+  mass: string;
 
   @Field(() => String)
-  manufacturer: string;
+  hair_color: string;
 
   @Field(() => String)
-  cost_in_credits: string;
+  skin_color: string;
 
   @Field(() => String)
-  length: string;
+  eye_color: string;
 
   @Field(() => String)
-  crew: string;
+  birth_year: string;
 
   @Field(() => String)
-  passengers: string;
+  gender: string;
 
   @Field(() => String)
-  max_atmosphering_speed: string;
-
-  @Field(() => String)
-  cargo_capacity: string;
-
-  @Field(() => String)
-  consumables: string;
-
-  @Field(() => [String])
-  films: string[];
-
-  @Field(() => [String])
-  pilots: string[];
+  homeworld: string;
 
   @Field(() => String)
   created: string;

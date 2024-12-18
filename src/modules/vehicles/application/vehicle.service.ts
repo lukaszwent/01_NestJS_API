@@ -1,80 +1,65 @@
+import { VehicleMapper } from '../vehicle.mapper';
 import { VehicleRepository } from '../infrastructure/vehicle.repository';
-import { Injectable, Logger } from '@nestjs/common';
-import { HttpService } from '@nestjs/axios';
-import { catchError, firstValueFrom } from 'rxjs';
-import { AxiosError } from 'axios';
-import { Vehicle } from '../entity/vehicle.entity';
-import { VehicleDetailsDto } from '../dto/vehicle-details.dto';
+import { Injectable } from '@nestjs/common';
 import { VehiclesListDto } from '../dto/vehicles-list.dto';
+import { VehicleDetailsDto } from '../dto/vehicle-details.dto';
+import { ExternalVehicle } from '../interfaces/external-vehicle.interface';
+import { HttpClientService } from '../../../common/services/http-client.service';
 
 @Injectable()
 export class VehicleService {
-  private readonly logger = new Logger(VehicleService.name);
-
   constructor(
-    private http: HttpService,
     private vehicleRepository: VehicleRepository,
+    private vehicleMapper: VehicleMapper,
+    private httpClient: HttpClientService,
   ) {}
 
   async findOne(id: string): Promise<VehicleDetailsDto> {
     const cachedVehicle = await this.vehicleRepository.findOne(id);
 
     if (cachedVehicle) {
-      return cachedVehicle;
+      return this.vehicleMapper.mapDetailsToDTO(cachedVehicle);
     }
 
-    const { data: vehicle } = await firstValueFrom(
-      this.http.get<Vehicle>(process.env.API_URL + '/vehicles/' + id).pipe(
-        catchError((error: AxiosError) => {
-          this.logger.error(error.response.data);
-          throw 'Something went wrong while fetching vehicle';
-        }),
-      ),
+    const vehicle = await this.httpClient.getOne<ExternalVehicle>(
+      `vehicles/${id}`,
     );
 
     this.vehicleRepository.saveVehicleInCache(vehicle);
 
-    return vehicle;
+    return this.vehicleMapper.mapDetailsToDTO(vehicle);
   }
 
-  async findAll(page?: number, query?: string): Promise<VehiclesListDto> {
-    const cachedVehicles = await this.vehicleRepository.findAll(page, query);
+  async findAll(page: number, limit: number): Promise<VehiclesListDto> {
+    const cachedVehicles = await this.vehicleRepository.findAll(page, limit);
 
     if (cachedVehicles) {
-      return cachedVehicles;
+      return this.vehicleMapper.mapListToDTO(cachedVehicles, { limit, page });
     }
 
     const params = {
       page: page,
-      search: query,
+      limit: limit,
     };
 
     if (!page) {
       delete params.page;
     }
-
-    if (!query) {
-      delete params.search;
+    if (!limit) {
+      delete params.limit;
     }
 
-    const { data } = await firstValueFrom(
-      this.http.get(process.env.API_URL + '/vehicles', { params }).pipe(
-        catchError((error: AxiosError) => {
-          this.logger.error(error.response.data);
-          throw 'Something went wrong while fetching vehicles';
-        }),
-      ),
+    const vehicles = await this.httpClient.getAll<ExternalVehicle>(
+      'vehicles',
+      params,
     );
 
-    const vehiclesListDto = new VehiclesListDto();
-    vehiclesListDto.results = data.results;
-    vehiclesListDto.isNext = data.next !== null;
-    vehiclesListDto.isPrevious = data.previous !== null;
-    vehiclesListDto.count = data.count;
-    vehiclesListDto.page = page;
-    vehiclesListDto.pages = Math.ceil(data.count / 10);
+    const vehiclesListDto = this.vehicleMapper.mapListToDTO(vehicles, {
+      limit,
+      page,
+    });
 
-    this.vehicleRepository.saveListOfVehiclesInCache(data, query);
+    this.vehicleRepository.saveListOfVehiclesInCache(vehicles, page, limit);
 
     return vehiclesListDto;
   }

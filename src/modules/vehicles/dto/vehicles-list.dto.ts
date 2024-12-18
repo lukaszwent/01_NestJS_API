@@ -20,4 +20,7 @@ export class VehiclesListDto {
 
   @Field(() => [VehicleDetailsDto])
   results: VehicleDetailsDto[];
+
+  @Field(() => Number)
+  limit: number;
 }

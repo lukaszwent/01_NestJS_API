@@ -1,6 +1,6 @@
 import { Args, Resolver, Query } from '@nestjs/graphql';
-import { FilmDetailsDto } from '../dto/film-details.dto';
 import { FilmService } from '../application/film.service';
+import { FilmDetailsDto } from '../dto/film-details.dto';
 
 @Resolver(() => FilmDetailsDto)
 export class FilmDetailsResolver {

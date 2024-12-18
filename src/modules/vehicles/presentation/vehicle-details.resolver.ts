@@ -1,6 +1,6 @@
 import { Args, Resolver, Query } from '@nestjs/graphql';
-import { VehicleDetailsDto } from '../dto/vehicle-details.dto';
 import { VehicleService } from '../application/vehicle.service';
+import { VehicleDetailsDto } from '../dto/vehicle-details.dto';
 
 @Resolver(() => VehicleDetailsDto)
 export class VehicleDetailsResolver {

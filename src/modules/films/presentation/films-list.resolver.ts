@@ -8,10 +8,10 @@ export class FilmsListResolver {
 
   @Query(() => FilmsListDto)
   async getFilmsList(
-    @Args('page') page: string,
-    @Args('query') searchQuery: string,
+    @Args('page', { defaultValue: 1 }) page: number = 1,
+    @Args('limit', { defaultValue: 10 }) limit: number = 10,
   ) {
-    return await this.filmsService.findAll(+page, searchQuery);
+    return await this.filmsService.findAll(+page, limit);
   }
 
   @Query(() => [[String, Number]])

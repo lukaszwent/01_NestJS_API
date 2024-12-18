@@ -8,8 +8,8 @@ export class FilmDetailsDto {
   @Field(() => String)
   title: string;
 
-  @Field(() => String)
-  episodeId: string;
+  @Field(() => Number)
+  episode_id: number;
 
   @Field(() => String)
   opening_crawl: string;
@@ -39,11 +39,11 @@ export class FilmDetailsDto {
   species: string[];
 
   @Field(() => String)
-  url: string;
-
-  @Field(() => String)
   created: string;
 
   @Field(() => String)
   edited: string;
+
+  @Field(() => String)
+  url: string;
 }
