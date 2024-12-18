@@ -1,18 +1,18 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PlanetsListResolver } from './planets-list.resolver';
-import { PlanetService } from '../application/planet.service';
-import { PlanetsListDto } from '../dto/planets-list.dto';
+import { SpeciesListResolver } from './species-list.resolver';
+import { SpeciesService } from '../application/species.service';
+import { SpeciesListDto } from '../dto/species-list.dto';
 
-describe('PlanetsListResolver', () => {
-  let resolver: PlanetsListResolver;
-  let service: PlanetService;
+describe('SpeciesListResolver', () => {
+  let resolver: SpeciesListResolver;
+  let service: SpeciesService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        PlanetsListResolver,
+        SpeciesListResolver,
         {
-          provide: PlanetService,
+          provide: SpeciesService,
           useValue: {
             findAll: jest.fn(),
           },
@@ -20,17 +20,17 @@ describe('PlanetsListResolver', () => {
       ],
     }).compile();
 
-    resolver = module.get<PlanetsListResolver>(PlanetsListResolver);
-    service = module.get<PlanetService>(PlanetService);
+    resolver = module.get<SpeciesListResolver>(SpeciesListResolver);
+    service = module.get<SpeciesService>(SpeciesService);
   });
 
   it('should be defined', () => {
     expect(resolver).toBeDefined();
   });
 
-  describe('getPlanetsList', () => {
-    it('should return a list of planets', async () => {
-      const result: PlanetsListDto = {
+  describe('getSpeciesList', () => {
+    it('should return a list of species', async () => {
+      const result: SpeciesListDto = {
         count: 1,
         isNext: null,
         isPrevious: null,
@@ -41,12 +41,12 @@ describe('PlanetsListResolver', () => {
       };
       jest.spyOn(service, 'findAll').mockResolvedValue(result);
 
-      expect(await resolver.getPlanetsList(1, 10)).toBe(result);
+      expect(await resolver.getSpeciesList(1, 10)).toBe(result);
       expect(service.findAll).toHaveBeenCalledWith(1, 10);
     });
 
     it('should use default values for page and limit', async () => {
-      const result: PlanetsListDto = {
+      const result: SpeciesListDto = {
         count: 1,
         isNext: null,
         isPrevious: null,
@@ -57,7 +57,7 @@ describe('PlanetsListResolver', () => {
       };
       jest.spyOn(service, 'findAll').mockResolvedValue(result);
 
-      expect(await resolver.getPlanetsList()).toBe(result);
+      expect(await resolver.getSpeciesList()).toBe(result);
       expect(service.findAll).toHaveBeenCalledWith(1, 10);
     });
   });

@@ -9,6 +9,7 @@ import { FilmsModule } from './modules/films/films.module';
 import { VehiclesModule } from './modules/vehicles/vehicles.module';
 import { PlanetsModule } from './modules/planets/planets.module';
 import { CommonModule } from './common/common.module';
+import { SpeciesModule } from './modules/species/species.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { CommonModule } from './common/common.module';
     CommonModule,
     FilmsModule,
     VehiclesModule,
+    SpeciesModule,
     PlanetsModule,
   ],
   controllers: [],
