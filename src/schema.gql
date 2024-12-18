@@ -29,12 +29,40 @@ type FilmsListDto {
   results: [FilmDetailsDto!]!
 }
 
+type PlanetDetailsDto {
+  climate: String!
+  created: String!
+  diameter: String!
+  edited: String!
+  gravity: String!
+  id: String!
+  name: String!
+  orbital_period: String!
+  population: String!
+  rotation_period: String!
+  surface_water: String!
+  terrain: String!
+  url: String!
+}
+
+type PlanetsListDto {
+  count: Int!
+  isNext: Boolean!
+  isPrevious: Boolean!
+  limit: Float!
+  page: Int!
+  pages: Int!
+  results: [PlanetDetailsDto!]!
+}
+
 type Query {
   getCharacterWithMostMentions: [String!]!
   getFilm(id: String!): FilmDetailsDto!
   getFilmsList(page: String!, query: String!): FilmsListDto!
   getSpecies(id: String!): SpeciesDetailsDto!
   getSpeciesList(page: String!, query: String!): SpeciesListDto!
+  getPlanet(id: String!): PlanetDetailsDto!
+  getPlanetsList(limit: Float = 10, page: String = "1"): PlanetsListDto!
   getUniqueWordPairs: [[String!]!]!
   getVehicle(id: String!): VehicleDetailsDto!
   getVehiclesList(page: String!, query: String!): VehiclesListDto!
