@@ -1,11 +1,11 @@
-import { TestingModule, Test } from '@nestjs/testing';
-import { VehicleService } from '../application/vehicle.service';
+import { Test, TestingModule } from '@nestjs/testing';
 import { VehiclesListResolver } from './vehicles-list.resolver';
+import { VehicleService } from '../application/vehicle.service';
 import { VehiclesListDto } from '../dto/vehicles-list.dto';
 
 describe('VehiclesListResolver', () => {
   let resolver: VehiclesListResolver;
-  let vehicleService: VehicleService;
+  let service: VehicleService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -21,32 +21,44 @@ describe('VehiclesListResolver', () => {
     }).compile();
 
     resolver = module.get<VehiclesListResolver>(VehiclesListResolver);
-    vehicleService = module.get<VehicleService>(VehicleService);
+    service = module.get<VehicleService>(VehicleService);
   });
 
   it('should be defined', () => {
     expect(resolver).toBeDefined();
   });
 
-  it('should return a list of vehicles', async () => {
-    const result: VehiclesListDto = new VehiclesListDto();
-    result.count = 0;
-    result.isNext = false;
-    result.isPrevious = false;
-    result.results = [];
-    result.page = 1;
-    result.pages = 1;
+  describe('getVehiclesList', () => {
+    it('should return a list of vehicles', async () => {
+      const result: VehiclesListDto = {
+        count: 1,
+        isNext: null,
+        isPrevious: null,
+        results: [],
+        page: 1,
+        pages: 1,
+        limit: 10,
+      };
+      jest.spyOn(service, 'findAll').mockResolvedValue(result);
 
-    jest.spyOn(vehicleService, 'findAll').mockResolvedValue(result);
-
-    expect(await resolver.getVehiclesList('1', '')).toEqual({
-      count: 0,
-      isNext: false,
-      isPrevious: false,
-      results: [],
-      page: 1,
-      pages: 1,
+      expect(await resolver.getVehiclesList(1, 10)).toBe(result);
+      expect(service.findAll).toHaveBeenCalledWith(1, 10);
     });
-    expect(vehicleService.findAll).toHaveBeenCalledWith(1, '');
+
+    it('should use default values for page and limit', async () => {
+      const result: VehiclesListDto = {
+        count: 1,
+        isNext: null,
+        isPrevious: null,
+        results: [],
+        page: 1,
+        pages: 1,
+        limit: 10,
+      };
+      jest.spyOn(service, 'findAll').mockResolvedValue(result);
+
+      expect(await resolver.getVehiclesList()).toBe(result);
+      expect(service.findAll).toHaveBeenCalledWith(1, 10);
+    });
   });
 });

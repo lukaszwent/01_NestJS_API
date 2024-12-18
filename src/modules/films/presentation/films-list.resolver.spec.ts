@@ -1,11 +1,11 @@
-import { TestingModule, Test } from '@nestjs/testing';
-import { FilmService } from '../application/film.service';
+import { Test, TestingModule } from '@nestjs/testing';
 import { FilmsListResolver } from './films-list.resolver';
+import { FilmService } from '../application/film.service';
 import { FilmsListDto } from '../dto/films-list.dto';
 
 describe('FilmsListResolver', () => {
   let resolver: FilmsListResolver;
-  let filmService: FilmService;
+  let service: FilmService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -15,63 +15,50 @@ describe('FilmsListResolver', () => {
           provide: FilmService,
           useValue: {
             findAll: jest.fn(),
-            getUniqueWordPairs: jest.fn(),
-            getCharacterWithMostMentions: jest.fn(),
           },
         },
       ],
     }).compile();
 
     resolver = module.get<FilmsListResolver>(FilmsListResolver);
-    filmService = module.get<FilmService>(FilmService);
+    service = module.get<FilmService>(FilmService);
   });
 
   it('should be defined', () => {
     expect(resolver).toBeDefined();
   });
 
-  it('should return a list of films', async () => {
-    const result: FilmsListDto = new FilmsListDto();
-    result.count = 0;
-    result.isNext = false;
-    result.isPrevious = false;
-    result.results = [];
-    result.page = 1;
-    result.pages = 1;
+  describe('getFilmsList', () => {
+    it('should return a list of films', async () => {
+      const result: FilmsListDto = {
+        count: 1,
+        isNext: null,
+        isPrevious: null,
+        results: [],
+        page: 1,
+        pages: 1,
+        limit: 10,
+      };
+      jest.spyOn(service, 'findAll').mockResolvedValue(result);
 
-    jest.spyOn(filmService, 'findAll').mockResolvedValue(result);
-
-    expect(await resolver.getFilmsList('1', '')).toEqual({
-      count: 0,
-      isNext: false,
-      isPrevious: false,
-      results: [],
-      page: 1,
-      pages: 1,
+      expect(await resolver.getFilmsList(1, 10)).toBe(result);
+      expect(service.findAll).toHaveBeenCalledWith(1, 10);
     });
-    expect(filmService.findAll).toHaveBeenCalledWith(1, '');
-  });
 
-  it('should return unique word pairs', async () => {
-    const result = [
-      ['word1', 1],
-      ['word2', 2],
-    ];
+    it('should use default values for page and limit', async () => {
+      const result: FilmsListDto = {
+        count: 1,
+        isNext: null,
+        isPrevious: null,
+        results: [],
+        page: 1,
+        pages: 1,
+        limit: 10,
+      };
+      jest.spyOn(service, 'findAll').mockResolvedValue(result);
 
-    jest.spyOn(filmService, 'getUniqueWordPairs').mockResolvedValue(result);
-
-    expect(await resolver.getUniqueWordPairs()).toEqual(result);
-    expect(filmService.getUniqueWordPairs).toHaveBeenCalled();
-  });
-
-  it('should return the character with most mentions', async () => {
-    const result = ['character1', 'character2'];
-
-    jest
-      .spyOn(filmService, 'getCharacterWithMostMentions')
-      .mockResolvedValue(result);
-
-    expect(await resolver.getCharacterWithMostMentions()).toEqual(result);
-    expect(filmService.getCharacterWithMostMentions).toHaveBeenCalled();
+      expect(await resolver.getFilmsList()).toBe(result);
+      expect(service.findAll).toHaveBeenCalledWith(1, 10);
+    });
   });
 });

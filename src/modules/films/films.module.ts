@@ -1,20 +1,20 @@
 import { Module } from '@nestjs/common';
 import { FilmService } from './application/film.service';
-import { HttpModule } from '@nestjs/axios';
 import { FilmRepository } from './infrastructure/film.repository';
-import { RedisModule } from '@nestjs-modules/ioredis';
 import { FilmDetailsResolver } from './presentation/film-details.resolver';
 import { FilmsListResolver } from './presentation/films-list.resolver';
+import { FilmMapper } from './film.mapper';
+import { PeopleModule } from '../people/people.module';
 
 @Module({
-  imports: [HttpModule, RedisModule],
+  imports: [PeopleModule],
   controllers: [],
   providers: [
     FilmService,
     FilmRepository,
     FilmDetailsResolver,
     FilmsListResolver,
-    FilmDetailsResolver,
+    FilmMapper,
   ],
 })
 export class FilmsModule {}

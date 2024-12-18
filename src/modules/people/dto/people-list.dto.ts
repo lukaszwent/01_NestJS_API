@@ -1,8 +1,8 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
-import { FilmDetailsDto } from './film-details.dto';
+import { PeopleDetailsDto } from './people-details.dto';
 
 @ObjectType()
-export class FilmsListDto {
+export class PeopleListDto {
   @Field(() => Int)
   count: number;
 
@@ -18,8 +18,8 @@ export class FilmsListDto {
   @Field(() => Boolean)
   isPrevious: boolean;
 
-  @Field(() => [FilmDetailsDto])
-  results: FilmDetailsDto[];
+  @Field(() => [PeopleDetailsDto])
+  results: PeopleDetailsDto[];
 
   @Field(() => Number)
   limit: number;

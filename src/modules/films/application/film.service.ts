@@ -1,122 +1,119 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { HttpService } from '@nestjs/axios';
-import { catchError, firstValueFrom } from 'rxjs';
-import { AxiosError } from 'axios';
-import { FilmDetailsDto } from '../dto/film-details.dto';
-import { FilmsListDto } from '../dto/films-list.dto';
-import { Film } from '../entity/film.entity';
+import { FilmMapper } from '../film.mapper';
 import { FilmRepository } from '../infrastructure/film.repository';
-
+import { Injectable } from '@nestjs/common';
+import { FilmsListDto } from '../dto/films-list.dto';
+import { FilmDetailsDto } from '../dto/film-details.dto';
+import { ExternalFilm } from '../interfaces/external-film.interface';
+import { HttpClientService } from '../../../common/services/http-client.service';
+import { PeopleService } from '../../people/application/people.service';
 @Injectable()
 export class FilmService {
-  private readonly logger = new Logger(FilmService.name);
-
   constructor(
-    private http: HttpService,
     private filmRepository: FilmRepository,
+    private filmMapper: FilmMapper,
+    private httpClient: HttpClientService,
+    private peopleService: PeopleService,
   ) {}
 
   async findOne(id: string): Promise<FilmDetailsDto> {
     const cachedFilm = await this.filmRepository.findOne(id);
 
     if (cachedFilm) {
-      return cachedFilm;
+      return this.filmMapper.mapDetailsToDTO(cachedFilm);
     }
 
-    const { data: film } = await firstValueFrom(
-      this.http.get<Film>(process.env.API_URL + '/films/' + id).pipe(
-        catchError((error: AxiosError) => {
-          this.logger.error(error.response.data);
-          throw 'Something went wrong while fetching film';
-        }),
-      ),
-    );
+    const film = await this.httpClient.getOne<ExternalFilm>(`films/${id}`);
 
     this.filmRepository.saveFilmInCache(film);
 
-    return film;
+    return this.filmMapper.mapDetailsToDTO(film);
   }
 
-  async findAll(page?: number, query?: string): Promise<FilmsListDto> {
-    const cachedFilms = await this.filmRepository.findAll(page, query);
+  async findAll(page: number, limit: number): Promise<FilmsListDto> {
+    const cachedFilms = await this.filmRepository.findAll(page, limit);
 
     if (cachedFilms) {
-      return cachedFilms;
+      return this.filmMapper.mapListToDTO(cachedFilms, { limit, page });
     }
 
     const params = {
       page: page,
-      search: query,
+      limit: limit,
     };
 
     if (!page) {
       delete params.page;
     }
-
-    if (!query) {
-      delete params.search;
+    if (!limit) {
+      delete params.limit;
     }
 
-    const { data } = await firstValueFrom(
-      this.http.get(process.env.API_URL + '/films', { params }).pipe(
-        catchError((error: AxiosError) => {
-          this.logger.error(error.response.data);
-          throw 'Something went wrong while fetching films';
-        }),
-      ),
-    );
+    const films = await this.httpClient.getAll<ExternalFilm>('films', params);
 
-    const filmsListDto = new FilmsListDto();
-    filmsListDto.results = data.results;
-    filmsListDto.isNext = data.next !== null;
-    filmsListDto.isPrevious = data.previous !== null;
-    filmsListDto.count = data.count;
-    filmsListDto.page = page;
-    filmsListDto.pages = Math.ceil(data.count / 10);
+    const filmsListDto = this.filmMapper.mapListToDTO(films, {
+      limit,
+      page,
+    });
 
-    this.filmRepository.saveListOfFilmsInCache(data, query);
+    this.filmRepository.saveListOfFilmsInCache(films, page, limit);
 
     return filmsListDto;
   }
 
   async getUniqueWordPairs(): Promise<(string | number)[][]> {
+    const cachedUniquePairs = await this.filmRepository.findUniqueWordPairs();
+
+    if (cachedUniquePairs) {
+      return cachedUniquePairs;
+    }
+
     let films = await this.filmRepository.findAll();
 
     if (!films) {
-      ({ data: films } = await firstValueFrom(
-        this.http.get(process.env.API_URL + '/films/'),
-      ));
+      films = await this.httpClient.getAll<ExternalFilm>('films', {
+        page: 1,
+        limit: 1000,
+      });
     }
 
     const openings = films.results.map((film) => film.opening_crawl);
     const wordCount: Record<string, number> = {};
 
     openings.forEach((opening) => {
-      const words = opening.split(/[\s\x00-\x1F]+/).filter((word) => word);
-
-      words.forEach((word) => {
-        const lowerCaseWord = word.toLowerCase();
-        wordCount[lowerCaseWord] = (wordCount[lowerCaseWord] || 0) + 1;
-      });
+      opening
+        .split(/[\s\x00-\x1F]+/)
+        .filter((word) => word)
+        .forEach((word) => {
+          const lowerCaseWord = word.toLowerCase();
+          wordCount[lowerCaseWord] = (wordCount[lowerCaseWord] || 0) + 1;
+        });
     });
 
     this.filmRepository.saveListOfFilmsInCache(films);
 
-    return Object.entries(wordCount);
+    const uniquePairs = Object.entries(wordCount);
+
+    this.filmRepository.saveUniqueWordPairsInCache(uniquePairs);
+
+    return uniquePairs;
   }
 
   async getCharacterWithMostMentions(): Promise<string[]> {
-    const films = await this.findAll();
+    const cachedCharacter =
+      await this.filmRepository.findCharacterWithMostMentions();
+
+    if (cachedCharacter) {
+      return cachedCharacter;
+    }
+
+    const films = await this.findAll(1, 1000);
 
     const openings = films.results.map((film) => film.opening_crawl);
 
-    // TODO Replace with PeopleService
-    const peopleResponse = await firstValueFrom(
-      this.http.get(`${process.env.API_URL}/people/`),
-    );
+    const peopleResponse = await this.peopleService.findAll(1, 1000);
     const nameCount: Record<string, number> = {};
 
-    peopleResponse.data.forEach((person) => {
+    peopleResponse.results.forEach((person) => {
       const nameRegex = new RegExp(`\\b${person.name}\\b`, 'gi');
       let count = 0;
       openings.forEach((opening) => {
@@ -131,8 +128,10 @@ export class FilmService {
     });
 
     const maxCount = Math.max(...Object.values(nameCount));
-    return Object.keys(nameCount).filter(
+    const character = Object.keys(nameCount).filter(
       (name) => nameCount[name] === maxCount,
     );
+    this.filmRepository.saveCharacterWithMostMentionsInCache(character);
+    return character;
   }
 }

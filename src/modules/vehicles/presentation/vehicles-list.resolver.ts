@@ -8,9 +8,9 @@ export class VehiclesListResolver {
 
   @Query(() => VehiclesListDto)
   async getVehiclesList(
-    @Args('page') page: string,
-    @Args('query') searchQuery: string,
+    @Args('page', { defaultValue: 1 }) page: number = 1,
+    @Args('limit', { defaultValue: 10, nullable: true }) limit: number = 10,
   ) {
-    return await this.vehiclesService.findAll(+page, searchQuery);
+    return await this.vehiclesService.findAll(+page, limit);
   }
 }

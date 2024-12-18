@@ -3,8 +3,8 @@ import { INestApplication } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TestingModule, Test } from '@nestjs/testing';
 import * as request from 'supertest';
-import { FilmService } from '../application/film.service';
 import { FilmDetailsResolver } from './film-details.resolver';
+import { FilmService } from '../application/film.service';
 
 describe('FilmDetailsResolver (e2e)', () => {
   let app: INestApplication;
@@ -25,7 +25,7 @@ describe('FilmDetailsResolver (e2e)', () => {
           useValue: {
             findOne: jest.fn().mockResolvedValue({
               id: '1',
-              title: 'Test title',
+              title: 'Test Film',
             }),
           },
         },
@@ -41,8 +41,8 @@ describe('FilmDetailsResolver (e2e)', () => {
     const query = `
             query {
                 getFilm(id: "1") {
-                  id,
-                  title
+                    id
+                    title
                 }
             }
         `;
@@ -53,7 +53,7 @@ describe('FilmDetailsResolver (e2e)', () => {
       .expect(200)
       .expect((res) => {
         expect(res.body.data.getFilm.id).toBe('1');
-        expect(res.body.data.getFilm.title).toBe('Test title');
+        expect(res.body.data.getFilm.title).toBe('Test Film');
       });
   });
 

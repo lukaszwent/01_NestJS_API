@@ -7,7 +7,7 @@ type FilmDetailsDto {
   created: String!
   director: String!
   edited: String!
-  episodeId: String!
+  episode_id: Float!
   id: String!
   opening_crawl: String!
   planets: [String!]!
@@ -24,9 +24,26 @@ type FilmsListDto {
   count: Int!
   isNext: Boolean!
   isPrevious: Boolean!
+  limit: Float!
   page: Int!
   pages: Int!
   results: [FilmDetailsDto!]!
+}
+
+type PeopleDetailsDto {
+  birth_year: String!
+  created: String!
+  edited: String!
+  eye_color: String!
+  gender: String!
+  hair_color: String!
+  height: String!
+  homeworld: String!
+  id: String!
+  mass: String!
+  name: String!
+  skin_color: String!
+  url: String!
 }
 
 type PlanetDetailsDto {
@@ -56,18 +73,18 @@ type PlanetsListDto {
 }
 
 type Query {
-  getCharacterWithMostMentions: [String!]!
+  getCharacterWithMostMentions: characterWithMostMentionsDto!
   getFilm(id: String!): FilmDetailsDto!
-  getFilmsList(page: String!, query: String!): FilmsListDto!
+  getFilmsList(limit: Float! = 10, page: Float! = 1): FilmsListDto!
   getPlanet(id: String!): PlanetDetailsDto!
   getPlanetsList(limit: Float = 10, page: Float! = 1): PlanetsListDto!
   getSpecies(id: String!): SpeciesDetailsDto!
   getSpeciesList(limit: Float! = 10, page: Float! = 1): SpeciesListDto!
   getStarship(id: String!): StarshipDetailsDto!
   getStarshipsList(limit: Float! = 10, page: Float! = 1): StarshipsListDto!
-  getUniqueWordPairs: [[String!]!]!
+  getUniqueWordPairs: UniqueWordPairsDto!
   getVehicle(id: String!): VehicleDetailsDto!
-  getVehiclesList(page: String!, query: String!): VehiclesListDto!
+  getVehiclesList(limit: Float = 10, page: Float! = 1): VehiclesListDto!
 }
 
 type SpeciesDetailsDto {
@@ -129,6 +146,10 @@ type StarshipsListDto {
   results: [StarshipDetailsDto!]!
 }
 
+type UniqueWordPairsDto {
+  uniqueWordPairs: [[String!]!]!
+}
+
 type VehicleDetailsDto {
   cargo_capacity: String!
   consumables: String!
@@ -153,7 +174,12 @@ type VehiclesListDto {
   count: Int!
   isNext: Boolean!
   isPrevious: Boolean!
+  limit: Float!
   page: Int!
   pages: Int!
   results: [VehicleDetailsDto!]!
+}
+
+type characterWithMostMentionsDto {
+  character: [String!]!
 }

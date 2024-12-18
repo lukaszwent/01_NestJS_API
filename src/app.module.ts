@@ -11,6 +11,7 @@ import { PlanetsModule } from './modules/planets/planets.module';
 import { CommonModule } from './common/common.module';
 import { SpeciesModule } from './modules/species/species.module';
 import { StarshipsModule } from './modules/starships/starships.module';
+import { PeopleModule } from './modules/people/people.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { StarshipsModule } from './modules/starships/starships.module';
     CommonModule,
     FilmsModule,
     VehiclesModule,
+    PeopleModule,
     StarshipsModule,
     SpeciesModule,
     PlanetsModule,

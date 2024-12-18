@@ -1,43 +1,48 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Vehicle } from '../entity/vehicle.entity';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
-import { VehiclesListDto } from '../dto/vehicles-list.dto';
+import { ExternalListResponse } from 'src/common/interfaces/external-list-response.interface';
+import { ExternalVehicle } from '../interfaces/external-vehicle.interface';
+import { ExternalItemResponse } from 'src/common/interfaces/external-item-response.interface';
 
 @Injectable()
 export class VehicleRepository {
   constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
 
   async saveListOfVehiclesInCache(
-    vehiclesListDto: VehiclesListDto,
-    query?: string,
+    vehicles: ExternalListResponse<ExternalVehicle>,
+    page?: number,
+    limit?: number,
   ): Promise<void> {
-    if (vehiclesListDto.page || query) {
+    if (page || limit) {
       await this.cacheManager.set(
-        `vehicles:${vehiclesListDto.page}:${query}`,
-        JSON.stringify(vehiclesListDto),
+        `vehicles:${page}:${limit}`,
+        JSON.stringify(vehicles),
       );
     } else {
-      await this.cacheManager.set(`vehicles`, JSON.stringify(vehiclesListDto));
+      await this.cacheManager.set(`vehicles`, JSON.stringify(vehicles));
     }
   }
 
-  async saveVehicleInCache(vehicle: Vehicle) {
+  async saveVehicleInCache(vehicle: ExternalItemResponse<ExternalVehicle>) {
     await this.cacheManager.set(
-      `vehicle:${vehicle.id}`,
+      `vehicle:${vehicle.result.uid}`,
       JSON.stringify(vehicle),
     );
   }
 
-  async findOne(id: string): Promise<Vehicle> {
+  async findOne(id: string): Promise<ExternalItemResponse<ExternalVehicle>> {
     const vehicle = await this.cacheManager.get(`vehicle:${id}`);
 
     return vehicle ? JSON.parse(vehicle as string) : null;
   }
 
-  async findAll(page: number, query: string): Promise<VehiclesListDto> {
+  async findAll(
+    page?: number,
+    limit?: number,
+  ): Promise<ExternalListResponse<ExternalVehicle>> {
     let vehicles;
-    if (page || query) {
-      vehicles = await this.cacheManager.get(`vehicles:${page}:${query}`);
+    if (page || limit) {
+      vehicles = await this.cacheManager.get(`vehicles:${page}:${limit}`);
     } else {
       vehicles = await this.cacheManager.get(`vehicles`);
     }
