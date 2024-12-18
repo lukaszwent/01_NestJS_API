@@ -64,7 +64,7 @@ type Query {
   getSpecies(id: String!): SpeciesDetailsDto!
   getSpeciesList(limit: Float! = 10, page: Float! = 1): SpeciesListDto!
   getStarship(id: String!): StarshipDetailsDto!
-  getStarshipsList(limit: Float = 10, page: Float! = 1): StarshipsListDto!
+  getStarshipsList(limit: Float! = 10, page: Float! = 1): StarshipsListDto!
   getUniqueWordPairs: [[String!]!]!
   getVehicle(id: String!): VehicleDetailsDto!
   getVehiclesList(page: String!, query: String!): VehiclesListDto!

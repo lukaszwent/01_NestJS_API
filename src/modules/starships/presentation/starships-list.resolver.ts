@@ -9,7 +9,7 @@ export class StarshipsListResolver {
   @Query(() => StarshipsListDto)
   async getStarshipsList(
     @Args('page', { defaultValue: 1 }) page: number = 1,
-    @Args('limit', { defaultValue: 10, nullable: true }) limit: number = 10,
+    @Args('limit', { defaultValue: 10 }) limit: number = 10,
   ) {
     return await this.starshipsService.findAll(page, limit);
   }
