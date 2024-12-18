@@ -2,6 +2,10 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type CharacterWithMostMentionsDto {
+  character: [String!]!
+}
+
 type FilmDetailsDto {
   characters: [String!]!
   created: String!
@@ -21,12 +25,6 @@ type FilmDetailsDto {
 }
 
 type FilmsListDto {
-  count: Int!
-  isNext: Boolean!
-  isPrevious: Boolean!
-  limit: Float!
-  page: Int!
-  pages: Int!
   results: [FilmDetailsDto!]!
 }
 
@@ -73,7 +71,7 @@ type PlanetsListDto {
 }
 
 type Query {
-  getCharacterWithMostMentions: characterWithMostMentionsDto!
+  getCharacterWithMostMentions: CharacterWithMostMentionsDto!
   getFilm(id: String!): FilmDetailsDto!
   getFilmsList(limit: Float! = 10, page: Float! = 1): FilmsListDto!
   getPlanet(id: String!): PlanetDetailsDto!
@@ -178,8 +176,4 @@ type VehiclesListDto {
   page: Int!
   pages: Int!
   results: [VehicleDetailsDto!]!
-}
-
-type characterWithMostMentionsDto {
-  character: [String!]!
 }

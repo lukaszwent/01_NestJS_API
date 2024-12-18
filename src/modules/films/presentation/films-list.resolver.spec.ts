@@ -31,13 +31,7 @@ describe('FilmsListResolver', () => {
   describe('getFilmsList', () => {
     it('should return a list of films', async () => {
       const result: FilmsListDto = {
-        count: 1,
-        isNext: null,
-        isPrevious: null,
         results: [],
-        page: 1,
-        pages: 1,
-        limit: 10,
       };
       jest.spyOn(service, 'findAll').mockResolvedValue(result);
 
@@ -47,13 +41,7 @@ describe('FilmsListResolver', () => {
 
     it('should use default values for page and limit', async () => {
       const result: FilmsListDto = {
-        count: 1,
-        isNext: null,
-        isPrevious: null,
         results: [],
-        page: 1,
-        pages: 1,
-        limit: 10,
       };
       jest.spyOn(service, 'findAll').mockResolvedValue(result);
 

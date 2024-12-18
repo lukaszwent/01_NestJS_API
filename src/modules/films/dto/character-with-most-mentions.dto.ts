@@ -1,7 +1,7 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
-export class characterWithMostMentionsDto {
+export class CharacterWithMostMentionsDto {
   @Field(() => [String])
   character: string[];
 }
