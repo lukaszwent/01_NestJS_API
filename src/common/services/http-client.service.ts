@@ -30,9 +30,7 @@ export class HttpClientService {
             const results = await Promise.all(
               data.results?.map(async (results) => {
                 const details = (
-                  await this.getOne<ExternalItemResponse<T>>(
-                    `${path_model}/${results.uid}`,
-                  )
+                  await this.getOne<T>(`${path_model}/${results.uid}`)
                 ).result?.properties;
 
                 return {
@@ -53,12 +51,14 @@ export class HttpClientService {
 
   async getOne<T>(path_model: string) {
     const { data } = await firstValueFrom(
-      this.http.get<T>(`${process.env.API_URL}/${path_model}`).pipe(
-        catchError((error: AxiosError) => {
-          this.logger.error(error.response.data);
-          throw error.response.data;
-        }),
-      ),
+      this.http
+        .get<ExternalItemResponse<T>>(`${process.env.API_URL}/${path_model}`)
+        .pipe(
+          catchError((error: AxiosError) => {
+            this.logger.error(error.response.data);
+            throw error.response.data;
+          }),
+        ),
     );
     return data;
   }

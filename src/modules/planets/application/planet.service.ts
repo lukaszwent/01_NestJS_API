@@ -3,7 +3,6 @@ import { PlanetRepository } from '../infrastructure/planet.repository';
 import { Injectable } from '@nestjs/common';
 import { PlanetsListDto } from '../dto/planets-list.dto';
 import { PlanetDetailsDto } from '../dto/planet-details.dto';
-import { ExternalItemResponse } from 'src/common/interfaces/external-item-response.interface';
 import { ExternalPlanet } from '../interfaces/external-planet.interface';
 import { HttpClientService } from '../../../common/services/http-client.service';
 
@@ -17,13 +16,14 @@ export class PlanetService {
 
   async findOne(id: string): Promise<PlanetDetailsDto> {
     const cachedPlanet = await this.planetRepository.findOne(id);
+
     if (cachedPlanet) {
       return this.planetMapper.mapDetailsToDTO(cachedPlanet);
     }
 
-    const planet = await this.httpClient.getOne<
-      ExternalItemResponse<ExternalPlanet>
-    >(`planets/${id}`);
+    const planet = await this.httpClient.getOne<ExternalPlanet>(
+      `planets/${id}`,
+    );
 
     this.planetRepository.savePlanetInCache(planet);
 

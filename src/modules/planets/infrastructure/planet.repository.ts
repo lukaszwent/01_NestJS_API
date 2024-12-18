@@ -37,7 +37,7 @@ export class PlanetRepository {
   }
 
   async findAll(
-    page: number,
+    page?: number,
     limit?: number,
   ): Promise<ExternalListResponse<ExternalPlanet>> {
     let planets;

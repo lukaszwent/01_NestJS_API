@@ -54,7 +54,7 @@ describe('PlanetService', () => {
   describe('findOne', () => {
     it('should return cached planet details if found in cache', async () => {
       const id = '1';
-      const cachedPlanet: ExternalItemResponse<ExternalPlanet> = {
+      const planetResponse: ExternalItemResponse<ExternalPlanet> = {
         message: 'OK',
         result: {
           properties: {
@@ -79,7 +79,7 @@ describe('PlanetService', () => {
       };
       const planetDetailsDto = new PlanetDetailsDto();
 
-      jest.spyOn(planetRepository, 'findOne').mockResolvedValue(cachedPlanet);
+      jest.spyOn(planetRepository, 'findOne').mockResolvedValue(planetResponse);
       jest
         .spyOn(planetMapper, 'mapDetailsToDTO')
         .mockReturnValue(planetDetailsDto);
@@ -87,19 +87,39 @@ describe('PlanetService', () => {
       const result = await service.findOne(id);
 
       expect(planetRepository.findOne).toHaveBeenCalledWith(id);
-      expect(planetMapper.mapDetailsToDTO).toHaveBeenCalledWith(cachedPlanet);
+      expect(planetMapper.mapDetailsToDTO).toHaveBeenCalledWith(planetResponse);
       expect(result).toBe(planetDetailsDto);
     });
 
     it('should fetch planet details from external API if not found in cache', async () => {
       const id = '1';
-      const externalPlanet = { id, name: 'Mars' };
+      const planetResponse: ExternalItemResponse<ExternalPlanet> = {
+        message: 'OK',
+        result: {
+          properties: {
+            name: 'Earth',
+            rotation_period: '24',
+            orbital_period: '365',
+            diameter: '12742',
+            climate: 'temperate',
+            gravity: '1 standard',
+            terrain: 'varied',
+            surface_water: '70',
+            population: '7.8 billion',
+            created: '2014-12-09T13:50:49.641000Z',
+            edited: '2014-12-20T20:58:18.411000Z',
+            url: 'https://swapi.dev/api/planets/1/',
+          },
+          description: '',
+          _id: '',
+          uid: '1',
+          __v: 0,
+        },
+      };
       const planetDetailsDto = new PlanetDetailsDto();
 
       jest.spyOn(planetRepository, 'findOne').mockResolvedValue(null);
-      jest
-        .spyOn(httpClient, 'getOne')
-        .mockResolvedValue({ data: externalPlanet });
+      jest.spyOn(httpClient, 'getOne').mockResolvedValue(planetResponse);
       jest.spyOn(planetRepository, 'savePlanetInCache').mockImplementation();
       jest
         .spyOn(planetMapper, 'mapDetailsToDTO')
@@ -109,12 +129,10 @@ describe('PlanetService', () => {
 
       expect(planetRepository.findOne).toHaveBeenCalledWith(id);
       expect(httpClient.getOne).toHaveBeenCalledWith(`planets/${id}`);
-      expect(planetRepository.savePlanetInCache).toHaveBeenCalledWith({
-        data: externalPlanet,
-      });
-      expect(planetMapper.mapDetailsToDTO).toHaveBeenCalledWith({
-        data: externalPlanet,
-      });
+      expect(planetRepository.savePlanetInCache).toHaveBeenCalledWith(
+        planetResponse,
+      );
+      expect(planetMapper.mapDetailsToDTO).toHaveBeenCalledWith(planetResponse);
       expect(result).toBe(planetDetailsDto);
     });
   });
@@ -165,7 +183,7 @@ describe('PlanetService', () => {
     it('should fetch planets list from external API if not found in cache', async () => {
       const page = 1;
       const limit = 10;
-      const externalPlanets: ExternalListResponse<ExternalPlanet> = {
+      const planetsResponse: ExternalListResponse<ExternalPlanet> = {
         message: 'OK',
         results: [
           {
@@ -192,7 +210,7 @@ describe('PlanetService', () => {
       const planetsListDto = new PlanetsListDto();
 
       jest.spyOn(planetRepository, 'findAll').mockResolvedValue(null);
-      jest.spyOn(httpClient, 'getAll').mockResolvedValue(externalPlanets);
+      jest.spyOn(httpClient, 'getAll').mockResolvedValue(planetsResponse);
       jest
         .spyOn(planetRepository, 'saveListOfPlanetsInCache')
         .mockImplementation();
@@ -206,11 +224,11 @@ describe('PlanetService', () => {
         limit,
       });
       expect(planetRepository.saveListOfPlanetsInCache).toHaveBeenCalledWith(
-        externalPlanets,
+        planetsResponse,
         page,
         limit,
       );
-      expect(planetMapper.mapListToDTO).toHaveBeenCalledWith(externalPlanets, {
+      expect(planetMapper.mapListToDTO).toHaveBeenCalledWith(planetsResponse, {
         limit,
         page,
       });

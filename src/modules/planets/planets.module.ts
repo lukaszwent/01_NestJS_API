@@ -1,4 +1,3 @@
-import { RedisModule } from '@nestjs-modules/ioredis';
 import { Module } from '@nestjs/common';
 import { PlanetService } from './application/planet.service';
 import { PlanetRepository } from './infrastructure/planet.repository';
@@ -7,7 +6,7 @@ import { PlanetsListResolver } from './presentation/planets-list.resolver';
 import { PlanetMapper } from './planet.mapper';
 
 @Module({
-  imports: [RedisModule],
+  imports: [],
   controllers: [],
   providers: [
     PlanetService,
